@@ -45,9 +45,26 @@ watch(tab, (newTab, oldTab) => {
 	}
 });
 
-watch(notificationsDrawerOpen, (open) => {
+watch(notificationsDrawerOpen, async (open) => {
 	// Load notifications only once the drawer is opened and reset when closed
 	collection.value = open ? 'directus_notifications' : null;
+	
+	// When drawer is opened, mark all notifications as read by updating their status
+	if (open) {
+		try {
+			await api.patch('/notifications', {
+				keys: notifications.value.map(n => n.id),
+				data: {
+					status: 'archived'
+				}
+			});
+			
+			// Refresh the unread count
+			await notificationsStore.refreshUnreadCount();
+		} catch (error) {
+			console.error('Failed to mark notifications as read:', error);
+		}
+	}
 });
 
 const filterSystem = computed(

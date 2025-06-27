@@ -1,0 +1,19 @@
+# Use the official Directus image as base
+FROM directus/directus:latest
+
+# Switch to root to make modifications
+USER root
+
+# Install any additional dependencies
+# RUN apk add --no-cache [your-dependencies]
+
+# Copy your custom extensions or modifications
+# COPY --chown=node:node ./extensions/ /directus/extensions/
+
+# If you have specific configuration files to add
+# COPY --chown=node:node ./config/ /directus/config/
+
+# Switch back to the node user
+USER node
+
+# Your custom CMD or ENTRYPOINT if needed (or leave it as is to use the default) 

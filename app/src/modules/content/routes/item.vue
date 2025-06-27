@@ -308,6 +308,40 @@ async function refreshLivePreview() {
 	}
 }
 
+watch(
+	router.currentRoute,
+	() => {
+		// Handle data parameter (existing functionality)
+		if (router.currentRoute.value.query.data) {
+			try {
+				const data = JSON.parse(router.currentRoute.value.query.data as string);
+				Object.assign(edits.value, data);
+			} catch {
+				// Malformed data can be safely ignored
+			}
+		}
+		
+		// Handle individual field parameters
+		const queryParams = router.currentRoute.value.query;
+		const fieldsToExclude = ['page', 'limit', 'sort', 'search', 'data', 'bookmark']; 
+		
+		// Get collection fields
+		const availableFields = fields.value?.map(field => field.field) || [];
+		
+		// Add any direct field values from query params to edits
+		for (const [key, value] of Object.entries(queryParams)) {
+			// Skip non-field query parameters
+			if (fieldsToExclude.includes(key)) continue;
+			
+			// Only apply values for fields that exist in this collection
+			if (availableFields.includes(key)) {
+				edits.value[key] = value;
+			}
+		}
+	},
+	{ immediate: true }
+);
+
 watch(saving, async (newVal, oldVal) => {
 	if (newVal === true || oldVal === false) return;
 
